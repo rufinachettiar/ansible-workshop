@@ -1,0 +1,2 @@
+[device]
+192.168.86.30 ansible_ssh_host=192.168.86.30 ansible_ssh_user=root ansible_ssh_pass=juniper123 ansible_port=22

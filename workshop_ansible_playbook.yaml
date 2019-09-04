@@ -1,0 +1,43 @@
+- name: juniper-workshop
+  hosts: device
+  roles:
+  - Juniper.junos
+  connection: local
+  gather_facts: no 
+
+  tasks:
+    - name: Checking NETCONF connectivity
+      wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+    - name: Gather Junos facts with no configuration
+      juniper_junos_facts:
+        host: "{{ inventory_hostname }}"
+        passwd: "{{ ansible_ssh_pass }}"
+      register: junos
+    - name: Print the show facts output.
+      debug:
+        var: junos
+
+    - name: Execute JUNOS command - show version, uptime and interface terse
+      juniper_junos_command:
+        passwd: "{{ ansible_ssh_pass }}"
+        commands:
+          - "show system uptime"
+          - "show interface terse"
+        dest: "/playbooks/logs/{{ inventory_hostname }}.commands.output"
+      register: response
+    - name: Print the command output of each.
+      debug:
+        var: item.stdout
+      with_items: "{{ response.results }}"
+
+    - name: Append .juniper to the hostname using private config mode.
+      juniper_junos_config:
+        config_mode: 'private'
+        load: 'merge'
+        lines:
+          - "set system host-name {{ inventory_hostname }}.juniper"
+      register: response
+    - name: Print the config changes.
+      debug:
+        var: response.diff_lines
