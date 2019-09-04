@@ -24,7 +24,6 @@
         commands:
           - "show system uptime"
           - "show interface terse"
-        dest: "/playbooks/logs/{{ inventory_hostname }}.commands.output"
       register: response
     - name: Print the command output of each.
       debug:
